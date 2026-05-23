@@ -6,12 +6,21 @@ import os
 canvas_width = 500
 canvas_height = 700
 
-meteoroids = 10
+#bullets/meteors
+meteoroids = 2
+
+bullet_width = 8
+bullet_height = 15
+uy = 90
+ay = 30
+#wtf is 'a'?
 a = 0
-pos = [0,0]
+hitbox_posx = [0,0]
 damage = 0
 lives = 5
-starting_time = time.time()
+#flag for level up purpose
+flag = 0
+MAX_LEVEL = 10
 def main():
     root = tk.Tk()
     root.title("Meteoroid Game")
@@ -20,110 +29,71 @@ def main():
     C.pack()
     #elements
                
-    ship = C.create_rectangle(0,canvas_height-200,20,canvas_height-180,fill = "red")
-    
-    #action    print(2)
-    def shower(lim):
-        beams = []
-        meteo = []
-        def beam(x,y):
+    ship = C.create_rectangle(0,canvas_height-200,60,canvas_height-180,fill = "red")
+    print("Total lives: 5") 
+    class bullets:
+            def __init__(self,level):
+                self.starting_time = time.time()
+                self.level = level
+                
+            def time_passed(self):
+                self.t = time.time() - self.starting_time
+                return self.t
+            def bullet_initial_position(self):
+                level = self.level
+                self.xy0 = [random.randrange(1,canvas_width),-1 * random.randint(0,500)
+]
+                x1,y1 = self.xy0
+                x2,y2 = x1 + bullet_width, y1 + bullet_height
+                color = ["red","yellow","green","blue"]
+                self.bullet = C.create_rectangle(x1,y1,x2,y2,fill="yellow")
+                #print(self.xy0)
+            def flow(self):
+                global flag,hitbox_posx
+                level = self.level
+                x1 = self.xy0[0]
+                #
+                t = self.time_passed()
+                y = self.xy0[1]
+                y1 = y + uy*t + 0.5*(self.level+1)*ay*(t**2) #extra fun
+                #y1 = y + uy*t + 0.5*ay*(t**2)
+                #
+                x2,y2 = x1 + bullet_width, y1 + bullet_height
+                C.coords(self.bullet,x1,y1,x2,y2+level*3)
+                if y1>=canvas_height-200 and y1<canvas_height-180:
+                    if ( x1 >= hitbox_posx[0] and x1<= hitbox_posx[1] ) or ( x2 >= hitbox_posx[0] and x2<= hitbox_posx[1] ):
+                        print("Damage ",end="")
+                        C.delete(self.bullet)
+                        print("dealt")
 
-            col = ["red","yellow","blue","white","green"]
-            return C.create_rectangle(x,y,x+2,y+10,fill = col[1],outline = "gold")
-        
-        class barage:
-            def __init__(self,index):
-                self.index = index
-            def rain(self):
-                global damage
-                damage_0 = damage
-                C.move(beams[self.index],0,1)
-                root.after(5,self.rain)
-                if len(C.coords(beams[self.index]))==4:
-                    x1,y1,x2,y2 = C.coords(beams[self.index])
+                if y1 <= canvas_height:
+
+                    root.after(20,self.flow)
+
                 else:
-                    x1,y1,x2,y2 = 0,0,0,0
-                #print(x1,y1,x2,y2)
-                
-                #print(C.coords(beams[self.index]))
-                x = pos[0]
-                y = pos[1]
-
-                if y == y1 or y == y2:
-                    if x1 >= x and x1<= x+20:
-
-                        #print("case 1a")
-                        damage += 1
-                        os.system("echo 1a >> stat")
-                        self.boom(beams[self.index])
-                    elif x2 >= x and x2<= x+20:
-
-                        #print("case 1b")
-                        damage += 1
-                        os.system("echo 1b >> stat")
-                        self.boom(beams[self.index])
-                    else: 
-                        pass
-                if x == x1 or x == x2 :
-                    if y1 >= y and y1 <= y+20:
-                        #print("case 2a")
-                        damage += 1
-                        os.system("echo 2a >> stat")
-                        self.boom(beams[self.index])
+                    flag += 1
+                    #print(flag)
+                    if level <= MAX_LEVEL and flag == meteoroids:
+                        print(f"level {level} completed!")
+                        flag = 0
+                        roundx(level+1)
+            def rain(self):
+                self.bullet_initial_position()
+                self.flow()
 
 
-                    elif y2 >= y and y2 <= y+20:
-                        #print("case 2b")
-                        damage += 1
-                        os.system("echo 2b >> stat")
-                        self.boom(beams[self.index])
-                    else:
-                        pass
-                increament = damage - damage_0 
-                #if increament > 0:
-                    ##print(damage,increament,damage_0)
-                    #damage_0 =damage
-
-            def boom(self,a):
-                global points
-                global lives
-                lives -= 1
-                #C.coords(a,0,0,0,0)
-                C.delete(a)
-                print(f"Lives remaining:",lives)
-                if lives == 0:
-                    ending_time = time.time()
-                    points = round((ending_time - starting_time)*250)
-
-                    C.delete('all')
-                    
-                    C.create_text(canvas_width/2, canvas_height/2,text = f"Points: {points}",font=("Arial",24),fill = "yellow")        
-                    os.system(f"echo {points} >> points_record")
-                    
-            def mouse(event):
-                global pos
+            def survive(event):
                 x = event.x
-                y = event.y
-                stage_y = canvas_height - 200
-                pos[0] = x
-                pos[1] = stage_y
-                C.coords(ship,x,stage_y,x+20,stage_y+20)
-                 
-            root.bind("<Motion>", mouse)                
-                 
+                C.coords(ship,x,canvas_height-200,x+60,canvas_height-180)
+                hitbox_posx[0] = x
+                hitbox_posx[1] = x+60
                 
+            root.bind("<Motion>", survive) 
+    def roundx(level):
         for i in range(meteoroids):
-                x = random.randint(1,canvas_width)
-                y = -1 * random.randint(lim*500,(lim+1)*500)
-                #print(x,y)
-                beams.append(beam(x,y))
-        #beams[i]=beam(x,y)
-        for i in range(10):
-                meteo.append(barage(i))
-                meteo[i].rain()
-
-    for i in range(10):
-        shower(i)
+            obj = bullets(level)
+            obj.rain()
+    roundx(0)
     root.mainloop()
 
 #    print("Points:",points) 
