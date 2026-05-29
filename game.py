@@ -77,6 +77,9 @@ def main():
                         print(f"level {level} completed!")
                         flag = 0
                         roundx(level+1)
+                    #if level == MAX_LEVEL +1:
+                     #   time.sleep(1)
+                      #  C.destroy()
             def rain(self):
                 self.bullet_initial_position()
                 self.flow()
@@ -88,6 +91,8 @@ def main():
                 #hitbox_posx[1] = x+60
                 pass
 
+#key-bindings: 
+        
             def goleft(event):
                 x = C.coords(ship)[0] - 20
                 y = C.coords(ship)[1] 
@@ -102,23 +107,28 @@ def main():
                 hitbox_posx[0] = x
                 hitbox_posx[1] = x+60
 
-            def hi():
+            def hi():       #go left function but for left arrow key
                 x = C.coords(ship)[0] - 20
                 y = C.coords(ship)[1] 
                 C.coords(ship,x,y,x+60,y+20)
                 hitbox_posx[0] = x
                 hitbox_posx[1] = x+60
-            def hello():
+            def hello():    #go right function for right arrow key
                 x = C.coords(ship)[0] + 20
                 y = C.coords(ship)[1] 
                 C.coords(ship,x,y,x+60,y+20)
                 hitbox_posx[0] = x
                 hitbox_posx[1] = x+60
+
+            def quit():
+                root.destroy()
+
                 
             root.bind("<Left>", goleft) 
             root.bind("<Right>", goright) 
             left_button=tk.Button(root, width = 10,text = "<=",command =hi )
             right_button=tk.Button(root, width = 10,text = "=>",command =hello)
+            end_button = tk.Button(root,width = 10,text  = "Quit",command=quit)
             label = tk.Label(root,text = f"Score: {damage}")
 
             label.pack()
@@ -133,6 +143,7 @@ def main():
 
     bullets.left_button.pack(padx= 10, pady = 15,side = 'left')
     bullets.right_button.pack(padx= 10, pady = 15,side = 'right')
+    bullets.end_button.pack(padx= 10, pady = 15)
     root.mainloop()
 if __name__ == "__main__":
     main()
