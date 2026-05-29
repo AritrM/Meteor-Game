@@ -64,7 +64,7 @@ def main():
                         print("Damage ",end="")
                         C.delete(self.bullet)
                         time.sleep(0.05)
-                        self.label.config(text=f"Damage: {damage}")
+                        self.label.config(text=f"Score: {damage}")
                         #C.itemconfig(self.bullet,fill = "blue")
                         damage += 1
                         print("dealt")
